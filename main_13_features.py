@@ -51,10 +51,10 @@ class MIMICIIIWithSepFeatures(nn.Module):
         for f_id in range(self.feature_num):
             model_i = nn.Sequential(
                 nn.Linear(self.static_embeddings_dim+self.hidden_dim_lstm, 2*(self.static_embeddings_dim+self.hidden_dim_lstm)),
-                nn.Sigmoid(),
+                nn.ReLU(),
                 nn.Dropout(p=self.dropout_p),
                 nn.Linear(2*(self.static_embeddings_dim+self.hidden_dim_lstm), 21),  # 21 is the target size (20 for icd9 labels, 1 for y_mortality)
-                nn.Sigmoid(),
+                nn.ReLU(),
                 nn.Dropout(p=self.dropout_p)
             )
             self.mlp_list.append(model_i.cuda())
@@ -124,11 +124,11 @@ def Get_dataloaders(num_of_features, batch_size):
                                                     [train_size + left_size, test_size, val_size],
                                                     generator=torch.Generator().manual_seed(42))
         train_loader_list.append(
-            DataLoader(train_set, batch_size=batch_size, collate_fn=my_collate, drop_last=True))
+            DataLoader(train_set, batch_size=batch_size, shuffle=True, collate_fn=my_collate, drop_last=True))
         val_loader_list.append(
-            DataLoader(val_set, batch_size=batch_size, collate_fn=my_collate, drop_last=True))
+            DataLoader(val_set, batch_size=batch_size, shuffle=True, collate_fn=my_collate, drop_last=True))
         test_loader_list.append(
-            DataLoader(test_set, batch_size=batch_size, collate_fn=my_collate, drop_last=True))
+            DataLoader(test_set, batch_size=batch_size, shuffle=True, collate_fn=my_collate, drop_last=True))
     return train_loader_list, val_loader_list, test_loader_list
 
 
@@ -241,7 +241,7 @@ def main(search_space, num_of_features, static_feature_dim, hyperparam_tune_time
 num_of_features = 13
 static_feature_dim = 5
 targets_type = 21
-hyperparam_tune_times = 30
+hyperparam_tune_times = 20
 
 search_space = {"static_embeddings_dim": list(range(2, 7)),
                 "hidden_dim_lstm": list(range(2, 7)),
