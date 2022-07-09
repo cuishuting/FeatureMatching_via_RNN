@@ -82,13 +82,15 @@ class BaseLineModel(nn.Module):
         return nn.functional.binary_cross_entropy_with_logits(predict, target)
 
 
-def TestProcess(trained_model, testloader):
+def TestProcess(trained_model, testloader, device):
     auroc = np.zeros(21)
     auprc = np.zeros(21)
     base_performance_for_auprc = np.zeros(21)
     predicts_for_auroc_auprc = np.zeros((21, 1000))
     targets_for_auroc_auprc = np.zeros((21, 1000))
     for t, (input_data, target) in enumerate(testloader):
+        input_data = input_data.to(device)
+        target = target.to(device)
         predict = trained_model(input_data)
         for i in range(21):
             predicts_for_auroc_auprc[i][t] = predict[0][i]
@@ -138,7 +140,7 @@ def main():
                 print("[%d, %d] loss: %.3f" % (epoch+1, t+1, loss))
 
     # Test Process
-    TestProcess(model, test_loader)
+    TestProcess(model, test_loader, device)
 
 
 
