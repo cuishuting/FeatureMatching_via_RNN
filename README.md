@@ -1,6 +1,6 @@
 # TimeSeries_Analysis
 ### GetDataset.py & main.py 
-
+![image](https://github.com/cuishuting/TimeSeries_Analysis/blob/main/IMG/main_model.png)
 
 ### GetDataset_static.py & main_static.py
 
