@@ -8,11 +8,6 @@ from GetDataset import dataset
 import matplotlib.pyplot as plt
 
 
-
-
-
-
-
 class CrossNet_MIMIC_III(nn.Module):
     def __init__(self, feature_dim, hidden_dim_lstm, hidden_size_mlp):
         super(CrossNet_MIMIC_III, self).__init__()
