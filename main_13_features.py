@@ -4,10 +4,11 @@ import os
 import torch.nn as nn
 from torch import optim
 from torch.utils.data import random_split, DataLoader
-from GetDataset_Each_Feature import datasets_13_features
+from GetDataset_Each_Feature import datasets_12_features
 from torch.nn.utils.rnn import pack_sequence
 from sklearn.metrics import average_precision_score, roc_auc_score
 import random
+from functools import partial
 
 
 
@@ -28,10 +29,11 @@ class MIMICIIIWithSepFeatures(nn.Module):
         self.batch_size = batch_size  # batch_size is used for packed sequence in lstm
         self.lstm_list = []
         self.initial_hidden_cell_list = []
-        self.mlp_list = nn.ModuleList() # these mlps are in the final part of the whole structure
+        self.mlp_list = nn.ModuleList()  # these mlps are in the final part of the whole structure
         for cur_feature in range(self.feature_num):
-            self.lstm_list.append(nn.LSTM(2, self.hidden_dim_lstm).cuda())  # "2" is because input contains 1) the value for
-            # the corresponding feature 2) mask for that value, 0 for missing and 1 for exist
+            self.lstm_list.append(nn.LSTM(2, self.hidden_dim_lstm, batch_first=True).cuda())
+            #  "2" is because input contains: 1) the value for the corresponding feature
+            #  2) mask for that value, 0 for missing and 1 for exist
             self.initial_hidden_cell_list.append((torch.randn(1, self.batch_size, self.hidden_dim_lstm).cuda(),
                                                   torch.randn(1, self.batch_size, self.hidden_dim_lstm).cuda()))
 
@@ -65,7 +67,7 @@ class MIMICIIIWithSepFeatures(nn.Module):
         # To get ith lstm's training data for feature i: input_data[i][1] (i starts from 0)
 
         features_embedding_list = []  # each element in this list trained from lstm has shape: [1,10,3]
-        predict_list = torch.zeros((13, self.batch_size, 21)).cuda()
+        predict_list = torch.zeros((self.feature_num, self.batch_size, 21)).cuda()
         static_var_for_one_batch = input_data[0][0]
         target_for_all_features = input_data[0][2]
         static_embedding_list = torch.zeros((1, self.batch_size, self.static_embeddings_dim)).cuda()
@@ -102,16 +104,20 @@ class MIMICIIIWithSepFeatures(nn.Module):
         return loss
 
 
-def my_collate(batch):
+def my_collate(batch, batch_size, seq_len):
     static_data_batch = [item[0] for item in batch]
-    input_lstm_batch = [torch.cat((item[1], item[2]), 1) for item in batch]
     target_batch = [item[3] for item in batch]
-    input_lstm_batch = pack_sequence(input_lstm_batch, enforce_sorted=False)
+    temporal_feature_batch = torch.zeros((batch_size, seq_len, 1))
+    mask_feature_batch = torch.zeros((batch_size, seq_len, 1))
+    for id, item in enumerate(batch):
+        temporal_feature_batch[id] = item[1].view(seq_len, 1)
+        mask_feature_batch[id] = item[2].view(seq_len, 1)
+    input_lstm_batch = torch.cat((temporal_feature_batch, mask_feature_batch), 2)
     return static_data_batch, input_lstm_batch, target_batch
 
 
-def Get_dataloaders(num_of_features, batch_size):
-    total_data_size = len(datasets_13_features[0])
+def Get_dataloaders(num_of_features, batch_size, seq_len):
+    total_data_size = len(datasets_12_features[0])
     train_size = int(0.65 * total_data_size)
     test_size = int(0.25 * total_data_size)
     val_size = int(0.1 * total_data_size)
@@ -120,15 +126,18 @@ def Get_dataloaders(num_of_features, batch_size):
     val_loader_list = []
     test_loader_list = []
     for i in range(num_of_features):
-        train_set, test_set, val_set = random_split(datasets_13_features[i],
+        train_set, test_set, val_set = random_split(datasets_12_features[i],
                                                     [train_size + left_size, test_size, val_size],
                                                     generator=torch.Generator().manual_seed(42))
         train_loader_list.append(
-            DataLoader(train_set, batch_size=batch_size, shuffle=True, collate_fn=my_collate, drop_last=True))
+            DataLoader(train_set, batch_size=batch_size, shuffle=True,
+                       collate_fn=partial(my_collate, batch_size=batch_size, seq_len=seq_len), drop_last=True))
         val_loader_list.append(
-            DataLoader(val_set, batch_size=batch_size, shuffle=True, collate_fn=my_collate, drop_last=True))
+            DataLoader(val_set, batch_size=batch_size, shuffle=True,
+                       collate_fn=partial(my_collate, batch_size=batch_size, seq_len=seq_len), drop_last=True))
         test_loader_list.append(
-            DataLoader(test_set, batch_size=batch_size, shuffle=True, collate_fn=my_collate, drop_last=True))
+            DataLoader(test_set, batch_size=batch_size, shuffle=True,
+                       collate_fn=partial(my_collate, batch_size=batch_size, seq_len=seq_len), drop_last=True))
     return train_loader_list, val_loader_list, test_loader_list
 
 
@@ -142,10 +151,9 @@ def TestProcess(test_loader_list, model, feature_num, targets_type, batch_size):
     with torch.no_grad():
         for t, data in enumerate(zip(test_loader_list[0], test_loader_list[1], test_loader_list[2], test_loader_list[3],
                                      test_loader_list[4], test_loader_list[5], test_loader_list[6], test_loader_list[7],
-                                     test_loader_list[8], test_loader_list[9], test_loader_list[10], test_loader_list[11],
-                                     test_loader_list[12])):
-            predict = model(data)  # (size: [13, batch_size, 21])
-            cur_target = data[0][2]  # (size: 10-length size, each element is a (21,) tensor)
+                                     test_loader_list[8], test_loader_list[9], test_loader_list[10], test_loader_list[11])):
+            predict = model(data)  # (size: [12, batch_size, 21])
+            cur_target = data[0][2]  # (size: batch_size-length size, each element is a (21,) tensor)
             new_target_list = torch.zeros((batch_size, targets_type)).cuda()  # (size: [10, 21])
             for b_id in range(batch_size):
                 new_target_list[b_id] = cur_target[b_id]
@@ -167,7 +175,7 @@ def TestProcess(test_loader_list, model, feature_num, targets_type, batch_size):
     print(perf_auroc)
 
 
-def main(search_space, num_of_features, static_feature_dim, hyperparam_tune_times, targets_type):
+def main(search_space, num_of_features, static_feature_dim, hyperparam_tune_times, targets_type, seq_len):
     best_loss = 0
     best_config = 0
     final_test_loader_list = 0
@@ -182,15 +190,14 @@ def main(search_space, num_of_features, static_feature_dim, hyperparam_tune_time
         mix_model.to(device)
         optimizer = optim.Adam(mix_model.parameters(), lr=config["learning_rate"], weight_decay=config["weight_decay"])
         # Get dataloaders
-        train_loader_list, val_loader_list, test_loader_list = Get_dataloaders(num_of_features, config["batch_size"])
+        train_loader_list, val_loader_list, test_loader_list = Get_dataloaders(num_of_features, config["batch_size"], seq_len)
         print("Train Loader and Val Loader are made successfully\n")
         print("Begin model training:\n")  # training 10 times on each hyperparameter configuration
         for epoch in range(10):
             for t, data in enumerate(
                     zip(train_loader_list[0], train_loader_list[1], train_loader_list[2], train_loader_list[3],
                         train_loader_list[4], train_loader_list[5], train_loader_list[6], train_loader_list[7],
-                        train_loader_list[8], train_loader_list[9], train_loader_list[10], train_loader_list[11],
-                        train_loader_list[12])):
+                        train_loader_list[8], train_loader_list[9], train_loader_list[10], train_loader_list[11])):
                 # in each feature's data -- 0: static_batch, 1: input_lstm_batch, 2: target_batch
 
                 predict = mix_model(data)
@@ -199,7 +206,7 @@ def main(search_space, num_of_features, static_feature_dim, hyperparam_tune_time
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                if (t + 1) % 1000 == 0:
+                if (t + 1) % 3000 == 0:
                     print("current epoch: ", (t + 1) * config["batch_size"], " current training loss: ", loss.item())
         print("Begin model validation:\n")
         val_loss = 0.0
@@ -207,8 +214,7 @@ def main(search_space, num_of_features, static_feature_dim, hyperparam_tune_time
         for val_id, val_data in enumerate(
                 zip(val_loader_list[0], val_loader_list[1], val_loader_list[2], val_loader_list[3],
                     val_loader_list[4], val_loader_list[5], val_loader_list[6], val_loader_list[7],
-                    val_loader_list[8], val_loader_list[9], val_loader_list[10], val_loader_list[11],
-                    val_loader_list[12])):
+                    val_loader_list[8], val_loader_list[9], val_loader_list[10], val_loader_list[11])):
             predict = mix_model(val_data)
             cur_target = val_data[0][2]
             loss = mix_model.Loss(cur_target, predict)
@@ -242,6 +248,7 @@ num_of_features = 13
 static_feature_dim = 5
 targets_type = 21
 hyperparam_tune_times = 20
+seq_len = 24
 
 search_space = {"static_embeddings_dim": list(range(2, 7)),
                 "hidden_dim_lstm": list(range(2, 7)),
@@ -250,6 +257,6 @@ search_space = {"static_embeddings_dim": list(range(2, 7)),
                 "learning_rate": list(np.logspace(np.log10(0.001), np.log10(0.5), base=10, num=20)),
                 "weight_decay": list(np.linspace(0.05, 0.5, 10))}
 
-main(search_space, num_of_features, static_feature_dim, hyperparam_tune_times, targets_type)
+main(search_space, num_of_features, static_feature_dim, hyperparam_tune_times, targets_type, seq_len)
 print("Finish!\n")
 
