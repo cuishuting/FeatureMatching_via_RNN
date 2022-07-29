@@ -14,7 +14,7 @@ class MIMICIIIEachFeature(Dataset):
         self.static_feature_list = []
         self.temporal_feature_list = []
         self.mask_list = []  # mask has the shape with temporal features
-        self.target_list = []  # target list has dim==21 : 20 for icd9 labels and 1 for mortality labels
+        self.target_list = []
 
         # load static variables
 
@@ -59,26 +59,27 @@ class MIMICIIIEachFeature(Dataset):
 
         # load targets (dim == 21)
 
-        if os.path.exists("./MultitaskTarget_sampled_imputed.pt"):
-            self.target_list = torch.load("./MultitaskTarget_sampled_imputed.pt")
-            print("Successfully load multi targets!\n")
+        if os.path.exists("./OnlyMortalityLabelTarget_sampled_imputed.pt"):
+            self.target_list = torch.load("./OnlyMortalityLabelTarget_sampled_imputed.pt")
+            print("Successfully load targets (only y_mor)!\n")
         else:
-            for i in range(len(self.org_data['y_icd9'])):
+            for i in range(len(self.org_data['y_mor'])):
                 if (i + 1) % 3000 == 0:
-                    print("currently transform (y_mor + icd9_labels): ", i + 1)
-                cur_icd9_labels = torch.tensor(self.org_data['y_icd9'][i])
+                    print("currently transform y_mor: ", i + 1)
+                # cur_icd9_labels = torch.tensor(self.org_data['y_icd9'][i])
                 cur_y_mor = torch.tensor(self.org_data['y_mor'][i])
-                self.target_list.append(torch.cat((cur_icd9_labels, cur_y_mor), 0).cuda())
-            torch.save(self.target_list, "MultitaskTarget_sampled_imputed.pt")
+                self.target_list.append(cur_y_mor.cuda())
+                # self.target_list.append(torch.cat((cur_icd9_labels, cur_y_mor), 0).cuda())
+            torch.save(self.target_list, "OnlyMortalityLabelTarget_sampled_imputed.pt")
 
     def __len__(self):
         return len(self.target_list)
 
     def __getitem__(self, idx):
-        sample_static_data = self.static_feature_list[idx]
-        sample_temporal_data = self.temporal_feature_list[idx][:, self.feature_id]
-        sample_mask_data = self.mask_list[idx][:, self.feature_id]
-        sample_target = self.target_list[idx]
+        sample_static_data = self.static_feature_list[idx]  # [5]
+        sample_temporal_data = self.temporal_feature_list[idx][:, self.feature_id]  # [24, 12] -> [24]
+        sample_mask_data = self.mask_list[idx][:, self.feature_id]  # [24, 12] -> [24]
+        sample_target = self.target_list[idx] # [1]
         return sample_static_data, sample_temporal_data, sample_mask_data, sample_target
 
 
