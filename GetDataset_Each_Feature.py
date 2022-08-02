@@ -59,18 +59,18 @@ class MIMICIIIEachFeature(Dataset):
 
         # load targets (dim == 21)
 
-        if os.path.exists("./OnlyMortalityLabelTarget_sampled_imputed.pt"):
-            self.target_list = torch.load("./OnlyMortalityLabelTarget_sampled_imputed.pt")
-            print("Successfully load targets (only y_mor)!\n")
+        if os.path.exists("./MultitaskTarget_sampled_imputed.pt"):
+            self.target_list = torch.load("./MultitaskTarget_sampled_imputed.pt")
+            print("Successfully load targets!\n")
         else:
             for i in range(len(self.org_data['y_mor'])):
                 if (i + 1) % 3000 == 0:
                     print("currently transform y_mor: ", i + 1)
-                # cur_icd9_labels = torch.tensor(self.org_data['y_icd9'][i])
+                cur_icd9_labels = torch.tensor(self.org_data['y_icd9'][i])
                 cur_y_mor = torch.tensor(self.org_data['y_mor'][i])
-                self.target_list.append(cur_y_mor.cuda())
-                # self.target_list.append(torch.cat((cur_icd9_labels, cur_y_mor), 0).cuda())
-            torch.save(self.target_list, "OnlyMortalityLabelTarget_sampled_imputed.pt")
+                # self.target_list.append(cur_y_mor.cuda())
+                self.target_list.append(torch.cat((cur_icd9_labels, cur_y_mor), 0).cuda())
+            torch.save(self.target_list, "./MultitaskTarget_sampled_imputed.pt")
 
     def __len__(self):
         return len(self.target_list)
@@ -79,11 +79,7 @@ class MIMICIIIEachFeature(Dataset):
         sample_static_data = self.static_feature_list[idx]  # [5]
         sample_temporal_data = self.temporal_feature_list[idx][:, self.feature_id]  # [24, 12] -> [24]
         sample_mask_data = self.mask_list[idx][:, self.feature_id]  # [24, 12] -> [24]
-        sample_target = self.target_list[idx] # [1]
+        sample_target = self.target_list[idx] # [21]
         return sample_static_data, sample_temporal_data, sample_mask_data, sample_target
 
 
-data_dir = os.path.abspath("./MIMIC_timeseries/24hours/series/imputed-normed-ep_1_24.npz")
-datasets_12_features = []
-for f in range(12):
-    datasets_12_features.append(MIMICIIIEachFeature(data_dir, f))
