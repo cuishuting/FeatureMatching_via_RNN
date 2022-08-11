@@ -56,5 +56,9 @@ This repository includes files for:
 
 ### GetDataset_Each_Feature.py & main_13_features.py
 ![image](https://github.com/cuishuting/TimeSeries_Analysis/blob/main/IMG/Screen%20Shot%202022-07-08%20at%204.01.46%20PM.png)
+* AUPRC of each feature on each target
+![image](https://github.com/cuishuting/TimeSeries_Analysis/blob/main/IMG/AUPRC_main_model.png)
+* AUROC of each feature on each target
+![image](https://github.com/cuishuting/TimeSeries_Analysis/blob/main/IMG/auroc_main_model.png)
 ### main_baseline.py
 ![image](https://github.com/cuishuting/TimeSeries_Analysis/blob/main/IMG/baseline_model.png)
