@@ -157,13 +157,7 @@ def main(data_addr, search_space, tune_times, epochs, seq_len, temporal_feature_
     train_size = total_data_size - (test_size + val_size)
     train_set, test_set, val_set = random_split(dataset_all_features, [train_size, test_size, val_size], generator=torch.Generator().manual_seed(42))
     final_test_loader = 0
-    """
-    below is the test on AUG 21st to see whether increasing the hidden state size for the final mlp will improve the test accuracy
-    """
-
-    """
-    the end of the test on AUG 21st
-    """
+    
     for tune_time in range(tune_times):
         config = {k: random.sample(v, 1)[0] for k, v in search_space.items()}
         train_loader = DataLoader(train_set, batch_size=config["batch_size"], shuffle=True, drop_last=True)
