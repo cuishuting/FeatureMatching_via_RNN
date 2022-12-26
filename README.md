@@ -1,4 +1,7 @@
-# TimeSeries_Analysis
+# FeatureMatching_via_RNN
+Because our goal is to get fingerprint for each temporal feature, we use seperate LSTMs to learn each time series data. We also add the prior knowledge from static variables and concatenate the temporal features’ embeddings and static embeddings to predict multi-targets. The reasonability of this structure is that we believe there is strong correlation between temporal features and the icd9 labels plus mortality labels. So do the static variables. The structure of the model is as follow.
+![image](https://github.com/cuishuting/FeatureMatching_via_RNN/blob/main/IMG/model_structure_rnn_model.png)
+
 Four baseline models' performance:
 * AUPRC of four baseline models (the first line is the base AUPRC performance based on the positive rate in each target class)
 ![image](https://github.com/cuishuting/TimeSeries_Analysis/blob/main/IMG/AUPRC_compares.png)
