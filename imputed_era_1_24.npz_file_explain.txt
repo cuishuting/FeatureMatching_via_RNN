@@ -1,0 +1,7 @@
+imputed_MV/CV_X_Y.npz : data after sampling and imputation. X (hours) is the length of interval of sampling and Y (hours) is the length of time series.
+‘ep_tdata’: temporal data. Shape: [number of admissions, Y/X, number of temporal features].
+‘ep_tdata_masking’: masking of temporal data. Shape: [number of admissions, Y/X, number of temporal features].
+‘adm_features_all’: non-temporal features of admissions. Shape: [number of admissions, number of non-temporal features].
+‘y_icd9’: icd9 labels. Shape: [number of admissions, number of icd9 categories].
+‘y_mor’: in-hospital mortality labels. Shape: [number of admissions].
+
