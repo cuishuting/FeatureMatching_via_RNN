@@ -1,0 +1,47 @@
+ump_feature_in_MV,ump_feature_in_MV_label,match_byGS_CV,match_byGS_CV_label,GoldStd_match_CV_itemids,GoldStd_match_CV_labels
+227565,Ventilator Tank #1,619,Respiratory Rate Set,6206.0,Tank A psi.
+227566,Ventilator Tank #2,917,Diagnosis/op,6207.0,Tank B psi.
+220046,Heart rate Alarm - High,5820,SpO2 Alarm [Low],8549.0,HR Alarm [High]
+220047,Heart Rate Alarm - Low,861,"WBC (4-11,000)",5815.0,HR Alarm [Low]
+220056,Arterial Blood Pressure Alarm - Low,51,Arterial BP [Systolic],5813.0,ABP Alarm [Low]
+220058,Arterial Blood Pressure Alarm - High,113,CVP,8547.0,ABP Alarm [High]
+220051,Arterial Blood Pressure diastolic,8368,Arterial BP [Diastolic],8368.0,Arterial BP [Diastolic]
+220050,Arterial Blood Pressure systolic,615,Resp Rate (Total),51.0,Arterial BP [Systolic]
+223761,Temperature Fahrenheit,678,Temperature F,678.0,Temperature F
+223751,Non-Invasive Blood Pressure Alarm - High,8551,NBP Alarm [High],8551.0,NBP Alarm [High]
+223752,Non-Invasive Blood Pressure Alarm - Low,791,Creatinine (0-1.3),5817.0,NBP Alarm [Low]
+223769,O2 Saturation Pulseoxymetry Alarm - High,920,Admit Ht,8554.0,SpO2 Alarm [High]
+223770,O2 Saturation Pulseoxymetry Alarm - Low,506,PEEP Set,5820.0,SpO2 Alarm [Low]
+224690,Respiratory Rate (Total),776,Arterial Base Excess,615.0,Resp Rate (Total)
+224696,Plateau Pressure,479,Orientation,543.0,Plateau Pressure
+224684,Tidal Volume (set),8441,NBP [Diastolic],683.0,Tidal Volume (Set)
+224685,Tidal Volume (observed),417,Inspired Gas Temp,682.0,Tidal Volume (Obser)
+224687,Minute Volume,69,BSA,450.0,Minute Volume(Obser)
+224688,Respiratory Rate (Set),219,High Resp. Rate,619.0,Respiratory Rate Set
+224689,Respiratory Rate (spontaneous),682,Tidal Volume (Obser),614.0,Resp Rate (Spont)
+224695,Peak Insp. Pressure,581,Previous WeightF,535.0,Peak Insp. Pressure
+224697,Mean Airway Pressure,837,Sodium (135-148),444.0,Mean Airway Pressure
+220052,Arterial Blood Pressure mean,444,Mean Airway Pressure,52.0,Arterial BP Mean
+220180,Non Invasive Blood Pressure diastolic,455,NBP [Systolic],8441.0,NBP [Diastolic]
+220179,Non Invasive Blood Pressure systolic,39,Airway Size,455.0,NBP [Systolic]
+220181,Non Invasive Blood Pressure mean,763,Daily Weight,456.0,NBP Mean
+226871,Expiratory Ratio,221,I:E Ratio,,
+226873,Inspiratory Ratio,190,FiO2 Set,,
+226531,Admission Weight (lbs.),762,Admit Wt,,
+220339,PEEP set,631,Sensitivity-Vent,506.0,PEEP Set
+220292,Minute Volume Alarm - Low,8554,SpO2 Alarm [High],,
+220293,Minute Volume Alarm - High,434,Low Exhaled Min Vol,,
+224639,Daily Weight,8553,Resp Alarm [High],763.0,Daily Weight
+224738,Inspiratory Time,50,Apnea Time Interval,,
+223834,O2 Flow,1127,"WBC   (4-11,000)",470.0,O2 Flow (lpm)
+223835,Inspired O2 Fraction,833,RBC,190.0,FiO2 Set
+220210,Respiratory Rate,8549,HR Alarm [High],618.0,Respiratory Rate
+224161,Resp Alarm - High,827,Phosphorous(2.7-4.5),8553.0,Resp Alarm [High]
+224162,Resp Alarm - Low,930,Ext,5819.0,Resp Alarm [Low]
+220045,Heart Rate,535,Peak Insp. Pressure,211.0,Heart Rate
+223875,Fspn High,470,O2 Flow (lpm),,
+223873,Paw High,742,calprevflg,,
+223874,Vti High,618,Respiratory Rate,,
+223876,Apnea Interval,543,Plateau Pressure,50.0,Apnea Time Interval
+220277,O2 saturation pulseoxymetry,646,SpO2,646.0,SpO2
+226253,SpO2 Desat Limit,87,Braden Score,,
